@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Panel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+    }
+    label,
+    input,
+    button {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    ul {
+      padding-left: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧍‍♂️ User Location Panel</h1>
+
+  <label for="lat">Latitude:</label>
+  <input type="number" id="lat" step="any" />
+
+  <label for="lon">Longitude:</label>
+  <input type="number" id="lon" step="any" />
+
+  <button onclick="sendLocation()">Send Location</button>
+
+  <h3>Nearby Drivers:</h3>
+  <ul id="nearby-drivers"></ul>
+
+  <script>
+    const userId = "6863dc70911b85fcfc1537f8";
+    const ws = new WebSocket(`ws://localhost:8000/api/v1/ws/nearby-drivers/${userId}`);
+
+    ws.onmessage = (event) => {
+    console.log(event.data)
+    const data = JSON.parse(event.data);
+    const li = document.createElement("li");
+    li.textContent = JSON.stringify(data);
+    const container = document.getElementById("nearby-drivers");
+    container.innerHTML = "";  // Clear existing content
+    container.appendChild(li);
+    };
+
+    function sendLocation() {
+      const lat = parseFloat(document.getElementById("lat").value);
+      const lon = parseFloat(document.getElementById("lon").value);
+      ws.send(JSON.stringify({ lat, lon }));
+    }
+  </script>
+</body>
+</html>
