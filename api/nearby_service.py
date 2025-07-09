@@ -30,15 +30,13 @@ async def user_ws(websocket: WebSocket, user_id: str):
         data = await websocket.receive_json()
         lat = data["lat"]
         lon = data["lon"]
+        distance = data.get("distance", 0)
         await update_user_location(user_id, lat, lon)
 
-        nearby_drivers = await get_nearby_drivers_data(lon, lat, max_distance=30000)
-        print("ddddd",nearby_drivers)
+        nearby_drivers = await get_nearby_drivers_data(lon, lat, max_distance=distance)
         if nearby_drivers:
-            for user in nearby_drivers:
-                await websocket.send_json(user)
+                await websocket.send_json(nearby_drivers)
         else:
-            print("geee")
             no_drivers_payload = {
                 "status": "success",
                 "message": "No nearby drivers found",
@@ -55,11 +53,11 @@ async def user_ws(websocket: WebSocket, user_id: str):
                         for message_id, data in messages:
                             driver_lat = float(data["lat"])
                             driver_lon = float(data["lon"])
+                            _distance = float(data["distance"])
 
-                            nearby_drivers_1 = await get_nearby_drivers_data(lon, lat, max_distance=30000)
+                            nearby_drivers_1 = await get_nearby_drivers_data(lon, lat, max_distance=_distance)
                             if nearby_drivers_1:
-                                for user1 in nearby_drivers_1:
-                                    await websocket.send_json(user1)
+                                    await websocket.send_json(nearby_drivers_1)
                             else:
                                 no_drivers_payload1 = {
                                     "status": "success",
@@ -79,12 +77,12 @@ async def user_ws(websocket: WebSocket, user_id: str):
             data = await websocket.receive_json()
             lat = data["lat"]
             lon = data["lon"]
+            distance = data["distance"]
             await update_user_location(user_id, lat, lon)
             await redis_conn.xadd(USER_STREAM, {"user_id": user_id, "lat": lat, "lon": lon})
-            nearby_users = await get_nearby_drivers_data(lon, lat, max_distance=30000)
-            if nearby_users:
-                for user in nearby_users:
-                    await websocket.send_json(user)
+            nearby_drivers = await get_nearby_drivers_data(lon, lat, max_distance=distance)
+            if nearby_drivers:
+                    await websocket.send_json(nearby_drivers)
             else:
                 no_drivers_payload = {
                     "status": "success",
