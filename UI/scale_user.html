@@ -51,7 +51,8 @@
     function sendLocation() {
       const lat = parseFloat(document.getElementById("lat").value);
       const lon = parseFloat(document.getElementById("lon").value);
-      ws.send(JSON.stringify({ lat, lon }));
+      const distance = 300;
+      ws.send(JSON.stringify({ lat, lon,distance }));
     }
   </script>
 </body>
