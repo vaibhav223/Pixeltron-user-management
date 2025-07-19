@@ -1,10 +1,9 @@
 import asyncio
 
-from fastapi import Query, APIRouter,WebSocket,WebSocketDisconnect
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+
 from domain.near_by_domain import get_nearby_drivers_data, update_user_location
 from helper.redis_helper import get_redis_conn
-from helper.response import ResponseBuilder
 
 nearby_router = APIRouter()
 DRIVER_STREAM = "driver_location_stream"
@@ -50,12 +49,12 @@ async def user_ws(websocket: WebSocket, user_id: str):
                 try:
                     response = await redis_conn.xreadgroup(groupname=group, consumername=consumer, streams={DRIVER_STREAM: ">"}, count=10, block=0)
                     for _, messages in response:
-                        for message_id, data in messages:
-                            driver_lat = float(data["lat"])
-                            driver_lon = float(data["lon"])
-                            _distance = float(data["distance"])
+                        for message_id, _data in messages:
+                            driver_lat = float(_data["lat"])
+                            driver_lon = float(_data["lon"])
+                            _distance = float(_data["distance"])
 
-                            nearby_drivers_1 = await get_nearby_drivers_data(lon, lat, max_distance=_distance)
+                            nearby_drivers_1 = await get_nearby_drivers_data(driver_lat, driver_lon, max_distance=_distance)
                             if nearby_drivers_1:
                                     await websocket.send_json(nearby_drivers_1)
                             else:

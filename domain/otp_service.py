@@ -14,7 +14,7 @@ def generate_otp(length=6):
     return ''.join([str(random.randint(0, 9)) for _ in range(length)])
 
 
-async def send_otp(contact: str,method: str,driver_id=None):
+async def send_otp(contact: str,method: str,user_id=None):
     otp_expiry = Config.OTP_EXPIRY_SECONDS
     otp = generate_otp()
     expiry_time = int(time.time()) + int(otp_expiry)
@@ -27,7 +27,7 @@ async def send_otp(contact: str,method: str,driver_id=None):
     db_client = await get_mongo_client()
     otp_collection = await get_collection(db_client, "otps")
     await otp_collection.update_one(
-        {'contact': contact,"driver_id":driver_id},
+        {'contact': contact,"user_id":user_id},
         {'$set': {'otp': otp, 'expires_at': expiry_time}},
         upsert=True
     )

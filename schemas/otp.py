@@ -52,7 +52,7 @@ class VerifyOtpResponse(BaseModel):
     message: str
 
 class VerifyLoginOtpRequest(BaseModel):
-    driver_id: str
+    user_id: str
     method: Literal['email', 'mobile']
     email: Optional[EmailStr] = None
     mobile: Optional[MobileStr] = None

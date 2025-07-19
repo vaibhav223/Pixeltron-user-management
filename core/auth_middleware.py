@@ -1,3 +1,5 @@
+import json
+
 import jwt
 from fastapi import Request
 from fastapi.responses import JSONResponse
@@ -5,6 +7,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from core.config import Config
 from domain.user import decode_token
+from helper.redis_helper import get_redis_conn
+from helper.response import ResponseBuilder
 
 
 class TokenVerificationMiddleware(BaseHTTPMiddleware):
@@ -21,18 +25,27 @@ class TokenVerificationMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         # Verify token from Authorization header
-        auth_header = request.headers.get("Authorization")
-        if not auth_header or not auth_header.startswith("Bearer "):
+        auth_header = request.headers.get("accesstoken")
+        if not auth_header:
             return JSONResponse(status_code=401, content={"message": "Authorization header missing or invalid"})
 
-        token_parts = auth_header.split(" ")
-        if len(token_parts) != 2 or token_parts[0] != "Bearer":
-            return JSONResponse(status_code=401, content={"message": "Invalid token format"})
 
-        token = token_parts[1]  # Extract the token part after "Bearer "
+        token = auth_header  # Extract the token part after "Bearer "
 
         try:
             payload = await decode_token(token)
+            session_id = payload["session_id"]
+            user_id = payload["user_id"]
+            redis_client = await get_redis_conn()
+            redis_key = f'AT001##{session_id}##{token}'
+            token_data = await redis_client.get(redis_key)
+            if not token_data:
+                return ResponseBuilder.error(message="Invalid token", code=401)
+            stored_token = json.loads(token_data)
+            if stored_token["access_token"] != token:
+                return ResponseBuilder.error(message="Invalid token", code=401)
+            elif payload.get("type") != "access":
+                return ResponseBuilder.error(message="Invalid token type", code=400)
             # payload = jwt.decode(token, Config.SECRET_KEY, algorithms=[Config.ALGORITHM])
             request.state.user = payload  # Store decoded payload in request.state
         except jwt.ExpiredSignatureError:
