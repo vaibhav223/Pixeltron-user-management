@@ -30,7 +30,7 @@ async def startup_event():
 
 if __name__ == "__main__":
     uvicorn.run("main:app",
-                port=8000,
+                port=8001,
                 log_level="info",
                 proxy_headers=True,
                 forwarded_allow_ips='*')
