@@ -134,8 +134,25 @@ async def user_websocket_handler(websocket: WebSocket, user_id: str):
                 #     "lat": lat,
                 #     "lon": lon
                 # })
-                drivers = await get_nearby_drivers_data(lon, lat, dist)
-                await websocket.send_json({"type": "nearby_drivers", "drivers": drivers or []})
+                nearby_drivers = await get_nearby_drivers_data(lon, lat, max_distance=30000)
+                if nearby_drivers:
+                    resp = {
+                        "type": "nearby_drivers",
+                        "status": "success",
+                        "nearbyDrivers": nearby_drivers,
+                        "totalCount": 0
+                    }
+                    await websocket.send_json(resp)
+                else:
+                    no_drivers_payload = {
+                        "type": "nearby_drivers",
+                        "status": "success",
+                        "message": "No nearby drivers found",
+                        "nearbyDrivers": [],
+                        "totalCount": 0
+                    }
+                    await websocket.send_json(no_drivers_payload)
+
 
             elif msg_type in ("delivered", "seen"):
                 await redis.xadd(DRIVER_DELIVERY_STREAM, {
