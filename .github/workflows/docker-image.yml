@@ -3,7 +3,7 @@ name: Docker Image Release
 on:
   push:
     tags:
-      - 'v*'  # Triggers only on Git tags like v1.0.0, v2.3.4, etc.
+      - 'v*'  # Triggers only on Git tags like v1.0.0, v2.3.4
 
 jobs:
   build:
@@ -20,7 +20,7 @@ jobs:
 
     - name: Extract tag name
       id: tag
-      run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+      run: echo "version=${GITHUB_REF##*/}" >> $GITHUB_OUTPUT
 
     - name: Build Docker image
       run: docker build . -t user-management:${{ steps.tag.outputs.version }}
