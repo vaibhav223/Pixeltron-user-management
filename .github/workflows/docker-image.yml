@@ -1,9 +1,7 @@
 name: Docker Image Build with Timestamp Tag
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:  # 👈 manual trigger only
 
 jobs:
   build:
@@ -30,6 +28,6 @@ jobs:
       run: |
         docker tag user-management:${{ steps.vars.outputs.tag }} vaibhavb1996/user-management:${{ steps.vars.outputs.tag }}
 
-    - name: Push Docker images
+    - name: Push Docker image
       run: |
         docker push vaibhavb1996/user-management:${{ steps.vars.outputs.tag }}
