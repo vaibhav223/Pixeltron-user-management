@@ -7,7 +7,7 @@ from helper.redis_helper import get_redis_conn
 
 nearby_router = APIRouter()
 DRIVER_STREAM = "driver_location_stream"
-USER_STREAM = "user_location_stream"  
+USER_STREAM = "user_location_stream"
 
 # @nearby_router.get("/nearby-drivers",tags=["NearBy Service"])
 # async def get_nearby_drivers(
