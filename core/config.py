@@ -32,3 +32,8 @@ class Config:
     REDIS_URL = "redis://{}:{}".format(REDIS_HOST, REDIS_PORT)
     DRIVER_STREAM = os.getenv('DRIVER_STREAM')
     USER_STREAM = os.getenv('USER_STREAM')
+    DRIVER_CHAT_STREAM = os.getenv('DRIVER_CHAT_STREAM')
+    DRIVER_DELIVERY_STREAM = os.getenv('DRIVER_DELIVERY_STREAM')
+    GROUP_NAME = os.getenv('GROUP_NAME')
+    USER_CHAT_STREAM = os.getenv('USER_CHAT_STREAM')
+    USER_DELIVERY_STREAM = os.getenv('USER_DELIVERY_STREAM')

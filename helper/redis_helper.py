@@ -8,3 +8,11 @@ async def get_redis_conn():
     return redis_client
 
 
+async def ensure_group(redis, stream_name, group_name):
+    try:
+        await redis.xgroup_create(stream_name, group_name, id="$", mkstream=True)
+    except Exception as e:
+        if "BUSYGROUP" not in str(e):
+            raise
+
+
