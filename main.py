@@ -1,7 +1,9 @@
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import factory
+from core.config import Config
 from domain.near_by_domain import init_groups
+from helper.redis_helper import get_redis_conn, ensure_group
 
 app = factory.create_app()
 
@@ -26,7 +28,11 @@ app.add_middleware(
 #     await redisHelper.redisShutdown()
 @app.on_event("startup")
 async def startup_event():
-    await init_groups()
+    redis = await get_redis_conn()
+
+    await ensure_group(redis, Config.USER_CHAT_STREAM, Config.GROUP_NAME)
+    await ensure_group(redis, Config.USER_DELIVERY_STREAM, Config.GROUP_NAME)
+    print("✅ Startup tasks complete.")
 
 if __name__ == "__main__":
     uvicorn.run("main:app",
